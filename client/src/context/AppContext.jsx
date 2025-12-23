@@ -11,7 +11,11 @@ const AppContextProvider = (props) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [credit, setCredit] = useState(0);
 
-  const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  // ✅ PRODUCTION SAFE BACKEND URL
+  const backendUrl =
+    import.meta.env.VITE_API_URL ||
+    "https://imagify-backend-e94d.onrender.com";
+
   const navigate = useNavigate();
   const isAuthenticated = !!token;
 
@@ -21,7 +25,7 @@ const AppContextProvider = (props) => {
   const loadCreditsData = async () => {
     try {
       const { data } = await axios.get(
-        backendUrl + "/api/user/credits",
+        `${backendUrl}/api/user/credits`,
         { headers: { token } }
       );
 
@@ -39,7 +43,7 @@ const AppContextProvider = (props) => {
   // 🔒 SAFE IMAGE GENERATION
   // ============================
   const generateImage = async (prompt) => {
-    // 🔐 HARD SAFETY NET
+    // HARD SAFETY NET
     if (credit <= 0) {
       toast.error("You have exhausted your credits");
       navigate("/buy");
@@ -48,7 +52,7 @@ const AppContextProvider = (props) => {
 
     try {
       const { data } = await axios.post(
-        backendUrl + "/api/image/generate-image",
+        `${backendUrl}/api/image/generate-image`,
         { prompt },
         { headers: { token } }
       );
