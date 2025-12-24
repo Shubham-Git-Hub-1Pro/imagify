@@ -26,13 +26,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ===============================
-// 🔥 CORS — FINAL FIX (NO MORE NETWORK ERROR)
+// 🔥 CORS — FINAL FIX
 // ===============================
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",                 // local dev
-      "https://imagify-rouge-zeta.vercel.app",  // vercel frontend
+      "http://localhost:5173",
+      "https://imagify-rouge-zeta.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "token"],
@@ -45,7 +45,7 @@ app.use(
 app.use(express.json());
 
 // ===============================
-// Health / Root Route
+// Root & Health Routes
 // ===============================
 app.get("/", (req, res) => {
   res.json({
@@ -54,7 +54,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// Optional (extra check)
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
@@ -64,6 +63,16 @@ app.get("/health", (req, res) => {
 // ===============================
 app.use("/api/user", userRouter);
 app.use("/api/image", imageRouter);
+
+// ===============================
+// ❗ 404 Handler (OPTIONAL but RECOMMENDED)
+// ===============================
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "API route not found ❌",
+  });
+});
 
 // ===============================
 // Start Server
