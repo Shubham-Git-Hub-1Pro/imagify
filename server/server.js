@@ -1,5 +1,5 @@
 // ===============================
-// server.js (FINAL PRODUCTION FIX)
+// server.js (FINAL PRODUCTION READY)
 // ===============================
 
 import express from "express";
@@ -10,28 +10,32 @@ import connectDB from "./config/mongodb.js";
 import userRouter from "./routes/userRoutes.js";
 import imageRouter from "./routes/imageRoutes.js";
 
-// Load env
+// ===============================
+// Load Environment Variables
+// ===============================
 dotenv.config();
 
-// Debug logs (safe)
+// Safe debug (Render logs)
 console.log("ENV Loaded ✔️");
 console.log("HF API Key Present?:", !!process.env.HF_API_KEY);
 
+// ===============================
+// App Init
+// ===============================
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ===============================
-// 🔥 CORS FIX (MOST IMPORTANT)
+// 🔥 CORS — FINAL FIX (NO MORE NETWORK ERROR)
 // ===============================
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",              // local dev
-      "https://imagify-rouge-zeta.vercel.app" // production frontend
+      "http://localhost:5173",                 // local dev
+      "https://imagify-rouge-zeta.vercel.app",  // vercel frontend
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "token"],
-    credentials: true,
   })
 );
 
@@ -41,14 +45,22 @@ app.use(
 app.use(express.json());
 
 // ===============================
-// Root test route (avoid Not Found)
+// Health / Root Route
 // ===============================
 app.get("/", (req, res) => {
-  res.send("Imagify Backend is running 🚀");
+  res.json({
+    success: true,
+    message: "Imagify Backend is running 🚀",
+  });
+});
+
+// Optional (extra check)
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
 });
 
 // ===============================
-// Routes
+// API Routes
 // ===============================
 app.use("/api/user", userRouter);
 app.use("/api/image", imageRouter);
