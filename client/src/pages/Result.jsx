@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState, useRef } from "react";
 import { assets } from "../assets/assets";
 import { motion } from "framer-motion";
 import { AppContext } from "../context/AppContext";
-import { loadImage } from "canvas";
 import { useNavigate } from "react-router-dom";
 
 // Chevron icon
@@ -87,64 +86,55 @@ const Result = () => {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    // 🔒 CREDIT SAFETY NET
+    // 🔒 CREDIT CHECK
     if (credit <= 0) {
       navigate("/buy");
       return;
     }
 
-    if (!input) return;
+    if (!input.trim()) return;
 
     setLoading(true);
 
-    const generatedImage = await generateImage(input);
+    try {
+      const generatedImage = await generateImage(input);
 
-    if (generatedImage) {
-      setImage(generatedImage);
+      if (generatedImage) {
+        setImage(generatedImage);
 
-      // ✅ PERSIST IMAGE TO GALLERY (localStorage)
-      const existingGallery =
-        JSON.parse(localStorage.getItem("galleryImages")) || [];
+        // Save to gallery (optional)
+        const gallery =
+          JSON.parse(localStorage.getItem("galleryImages")) || [];
 
-      const newImage = {
-        id: Date.now(),
-        url: generatedImage,
-        prompt: input,
-      };
+        gallery.unshift({
+          id: Date.now(),
+          url: generatedImage,
+          prompt: input,
+        });
 
-      localStorage.setItem(
-        "galleryImages",
-        JSON.stringify([newImage, ...existingGallery])
-      );
+        localStorage.setItem(
+          "galleryImages",
+          JSON.stringify(gallery)
+        );
+      }
+    } catch (err) {
+      console.error("Image generation failed", err);
     }
 
     setLoading(false);
   };
 
+  // ⬇️ Download base64 image
+  const downloadImage = () => {
+    const link = document.createElement("a");
+    link.href = image;
+    link.download = `imagify.${format.toLowerCase()}`;
+    link.click();
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const convertImage = async (input, format) => {
-    const img = await loadImage(input);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-
-    const ext = format.toLowerCase();
-
-    canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `image.${ext}`;
-      link.click();
-      URL.revokeObjectURL(url);
-    }, `image/${ext}`);
-  };
 
   return (
     <motion.form
@@ -215,12 +205,12 @@ const Result = () => {
             <CustomDropdown
               format={format}
               setFormat={setFormat}
-              formats={["JPEG", "PNG", "WebP"]}
+              formats={["PNG", "JPEG", "WEBP"]}
             />
           </div>
 
           <button
-            onClick={() => convertImage(image, format)}
+            onClick={downloadImage}
             type="button"
             className="bg-zinc-900 text-white px-10 py-3 rounded-full"
           >

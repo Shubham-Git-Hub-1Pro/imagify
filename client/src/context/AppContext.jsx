@@ -6,27 +6,37 @@ import { useNavigate } from "react-router-dom";
 export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
+  const navigate = useNavigate();
+
+  // ============================
+  // STATE
+  // ============================
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [credit, setCredit] = useState(0);
 
-  // ✅ PRODUCTION SAFE BACKEND URL
+  const isAuthenticated = Boolean(token);
+
+  // ============================
+  // ✅ CORRECT BACKEND URL
+  // ============================
   const backendUrl =
     import.meta.env.VITE_API_URL ||
-    "https://imagify-backend-e94d.onrender.com";
-
-  const navigate = useNavigate();
-  const isAuthenticated = !!token;
+    "https://imagify-backend-es4d.onrender.com";
 
   // ============================
-  // LOAD USER DATA
+  // LOAD USER + CREDITS
   // ============================
   const loadCreditsData = async () => {
+    if (!token) return;
+
     try {
       const { data } = await axios.get(
         `${backendUrl}/api/user/credits`,
-        { headers: { token } }
+        {
+          headers: { token },
+        }
       );
 
       if (data.success) {
@@ -40,10 +50,14 @@ const AppContextProvider = (props) => {
   };
 
   // ============================
-  // 🔒 SAFE IMAGE GENERATION
+  // 🔥 IMAGE GENERATION
   // ============================
   const generateImage = async (prompt) => {
-    // HARD SAFETY NET
+    if (!token) {
+      toast.error("Please login first");
+      return null;
+    }
+
     if (credit <= 0) {
       toast.error("You have exhausted your credits");
       navigate("/buy");
@@ -54,18 +68,17 @@ const AppContextProvider = (props) => {
       const { data } = await axios.post(
         `${backendUrl}/api/image/generate-image`,
         { prompt },
-        { headers: { token } }
+        {
+          headers: { token },
+        }
       );
 
       if (data.success) {
+        // refresh credits after generation
         loadCreditsData();
         return data.imageUrl;
       } else {
         toast.error(data.message || "Image generation failed");
-
-        if (data.creditBalance === 0) {
-          navigate("/buy");
-        }
         return null;
       }
     } catch (error) {
@@ -80,17 +93,24 @@ const AppContextProvider = (props) => {
   // ============================
   const logout = () => {
     localStorage.removeItem("token");
-    setToken("");
+    setToken(null);
     setUser(null);
+    setCredit(0);
     navigate("/");
   };
 
+  // ============================
+  // EFFECTS
+  // ============================
   useEffect(() => {
     if (token) {
       loadCreditsData();
     }
   }, [token]);
 
+  // ============================
+  // CONTEXT VALUE
+  // ============================
   const value = {
     user,
     setUser,

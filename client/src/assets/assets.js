@@ -82,22 +82,24 @@ export const testimonialsData = [
     text: "The versatility of Imagify is incredible. From mockups to concept art, it helps me visualize designs quickly. The intuitive interface makes it a joy to use in my design workflow."
   },
 ]
-
-/* ✅ FIXED PLANS DATA (IMPORTANT) */
+/* ✅ UPDATED PLANS DATA (REALISTIC PRICING) */
 export const plans = [
   {
     id: 'Basic',
+    price: 99,
     credits: 5,
-    desc: 'Best for personal use.'
+    desc: 'Perfect for getting started with AI image generation.'
   },
   {
     id: 'Advanced',
+    price: 199,
     credits: 15,
-    desc: 'Best for business use.'
+    desc: 'Ideal for regular users and content creators.'
   },
   {
     id: 'Business',
+    price: 399,
     credits: 30,
-    desc: 'Best for enterprise use.'
+    desc: 'Best for professionals, teams, and heavy usage.'
   },
-]
+];
