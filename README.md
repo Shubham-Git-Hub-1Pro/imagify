@@ -44,7 +44,7 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/singh04ayush/imagify.git
+git clone https://github.com/Shubham-Git-Hub-1Pro/imagify.git
 cd imagify
 ```
 
@@ -61,12 +61,12 @@ touch .env
 
 # Add the following environment variables to .env:
 PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-CLIPDROP_API=your_clipdrop_api_key
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+HF_API_KEY=your_huggingface_api_key
 
 # Start the server
-npm run server
+npm start
 ```
 
 #### Backend Environment Variables Explanation
@@ -75,7 +75,7 @@ npm run server
 | `PORT` | Server port number | `5000` |
 | `MONGODB_URI` | MongoDB connection string | `mongodb+srv://username:password@cluster.mongodb.net/imagify` |
 | `JWT_SECRET` | Secret key for JWT authentication | `your-secret-key-here` |
-| `CLIPDROP_API` | API key for ClipDrop image generation | `your-clipdrop-api-key` |
+| `CLIPDROP_API` | API key for Hugging Face image generation | `your-Hugging Face-api-key` |
 
 ### 3. Frontend Setup
 ```bash
