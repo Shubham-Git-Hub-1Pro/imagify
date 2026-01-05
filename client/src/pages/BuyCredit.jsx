@@ -14,33 +14,85 @@ const BuyCredit = () => {
     setShowLogin,
   } = useContext(AppContext);
 
-  // 🔥 SEND PLAN TO BACKEND
-  const handleBuyCredits = async (planId) => {
+  // ===============================
+  // 🔥 RAZORPAY FLOW
+  // ===============================
+  const handleBuyCredits = async (plan) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
 
     try {
+      // 1️⃣ Create order from backend
       const { data } = await axios.post(
-        `${backendUrl}/api/user/buy-credits`,
+        `${backendUrl}/api/payment/create-order`,
         {
-          plan: planId.toLowerCase(), // basic | advanced | business
+          amount: plan.price,
+          credits: plan.credits,
         },
         {
           headers: { token },
         }
       );
 
-      if (data.success) {
-        toast.success(data.message);
-        loadCreditsData();
-      } else {
-        toast.error(data.message || "Failed to add credits");
+      if (!data.success) {
+        toast.error("Failed to create payment order");
+        return;
       }
+
+      const order = data.order;
+
+      // 2️⃣ Razorpay checkout options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: "INR",
+        name: "Imagify",
+        description: `${plan.credits} Credits Purchase`,
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            // 3️⃣ Verify payment
+            const verifyRes = await axios.post(
+              `${backendUrl}/api/payment/verify`,
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                credits: plan.credits,
+              },
+              {
+                headers: { token },
+              }
+            );
+
+            if (verifyRes.data.success) {
+              toast.success("Credits added successfully 🎉");
+              loadCreditsData();
+            } else {
+              toast.error("Payment verification failed");
+            }
+          } catch (err) {
+            console.error(err);
+            toast.error("Error verifying payment");
+          }
+        },
+        prefill: {
+          name: user?.name || "Imagify User",
+          email: user?.email || "",
+        },
+        theme: {
+          color: "#1f2937",
+        },
+      };
+
+      // 4️⃣ Open Razorpay
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error) {
       console.error(error);
-      toast.error("Server error while adding credits");
+      toast.error("Something went wrong with payment");
     }
   };
 
@@ -71,7 +123,6 @@ const BuyCredit = () => {
             <p className="mt-3 mb-1 font-semibold">{item.id}</p>
             <p className="text-sm">{item.desc}</p>
 
-            {/* ✅ FINAL PRICE FIX */}
             <p className="mt-6">
               <span className="text-3xl font-medium">
                 ₹{item.price}
@@ -86,10 +137,10 @@ const BuyCredit = () => {
             </p>
 
             <button
-              onClick={() => handleBuyCredits(item.id)}
+              onClick={() => handleBuyCredits(item)}
               className="w-full bg-gray-800 text-white mt-8 text-sm rounded-md py-2.5 min-w-52"
             >
-              {user ? "Add Credits" : "Login to Continue"}
+              {user ? "Buy Credits" : "Login to Continue"}
             </button>
           </div>
         ))}

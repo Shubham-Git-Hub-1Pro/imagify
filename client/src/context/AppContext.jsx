@@ -11,15 +11,19 @@ const AppContextProvider = (props) => {
   // ============================
   // STATE
   // ============================
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
   const [showLogin, setShowLogin] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [credit, setCredit] = useState(0);
+  const [credit, setCredit] = useState(
+    Number(localStorage.getItem("credit")) || 0
+  );
 
   const isAuthenticated = Boolean(token);
 
   // ============================
-  // ✅ CORRECT BACKEND URL
+  // BACKEND URL
   // ============================
   const backendUrl =
     import.meta.env.VITE_API_URL ||
@@ -40,8 +44,13 @@ const AppContextProvider = (props) => {
       );
 
       if (data.success) {
+        // 🔥 SINGLE SOURCE OF TRUTH
         setCredit(data.credits);
         setUser(data.user);
+
+        // 🔥 PERSIST DATA
+        localStorage.setItem("credit", data.credits);
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
     } catch (error) {
       console.error(error);
@@ -50,7 +59,7 @@ const AppContextProvider = (props) => {
   };
 
   // ============================
-  // 🔥 IMAGE GENERATION
+  // IMAGE GENERATION
   // ============================
   const generateImage = async (prompt) => {
     if (!token) {
@@ -74,8 +83,7 @@ const AppContextProvider = (props) => {
       );
 
       if (data.success) {
-        // refresh credits after generation
-        loadCreditsData();
+        await loadCreditsData(); // 🔥 refresh credits
         return data.imageUrl;
       } else {
         toast.error(data.message || "Image generation failed");
@@ -93,9 +101,13 @@ const AppContextProvider = (props) => {
   // ============================
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("credit");
+
     setToken(null);
     setUser(null);
     setCredit(0);
+
     navigate("/");
   };
 
