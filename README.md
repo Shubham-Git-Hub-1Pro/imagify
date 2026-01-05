@@ -193,7 +193,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-### Contributed with ❤️ by [singh04ayush] & [ phoenixdev100 ] 
+### This project is independently maintained and extended by Shubham Kumar Yadav. 
 OCT 2025
 
 [![GitHub Follow](https://img.shields.io/github/followers/singh04ayush?style=social)](https://github.com/singh04ayush)
