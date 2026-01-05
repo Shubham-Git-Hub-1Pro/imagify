@@ -23,11 +23,12 @@
 
 ## ✨ Features
 
-- 🚀 **Fast Processing**: Optimized for performance
-- 📱 **Responsive Design**: Works on all devices
-- 🔒 **Secure Processing**: Your images stay private
-- 💡 **AI**: AI-powered Images
-
+- 🧠 **AI Text to Image** — Generate images from text prompts  
+- ⚡ **Fast Processing** — Optimized for performance  
+- 📱 **Responsive UI** — Works across all devices  
+- 🔐 **Secure Authentication** — JWT-based user system  
+- 💳 **Credit-Based System** — Transparent usage tracking  
+- 🖼️ **Personal Gallery** — Save, preview & download images  
 
 
 ## 🚀 Quick Start
